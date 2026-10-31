@@ -1,1 +1,268 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FinAI Wealth Dashboard</title>
+<style>
+:root{--navy:#10233f;--blue:#2454a6;--green:#16a05a;--red:#e05260;--bg:#f3f6fc;--ink:#17243b;--muted:#788398;--line:#e8edf5}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px Arial,sans-serif}
+.app{display:grid;grid-template-columns:205px 1fr;min-height:100vh}
+aside{background:linear-gradient(180deg,#10233f,#142e50);color:white;padding:20px 12px;display:flex;flex-direction:column;gap:8px}
+.brand{font-size:22px;font-weight:800;padding:4px 8px 22px}
+.brand small{display:block;font-size:10px;color:#a9bfdc;letter-spacing:1px}
+.nav{display:flex;flex-direction:column;gap:5px}
+.nav button{background:transparent;color:#dce7f6;text-align:left;border:0;padding:11px;border-radius:9px;font-size:13px}
+.nav button:hover{background:#294a7b}
+.quote{margin-top:auto;padding:14px;background:#1c365a;border-radius:12px;color:#d5e0ef;font-style:italic;line-height:1.5;font-size:12px}
+main{min-width:0;padding:22px 24px 40px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+.top h1{font-size:25px;margin:0 0 5px}
+.sub,.hint{color:var(--muted);font-size:12px}
+.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+button{cursor:pointer;border:1px solid var(--line);background:white;color:var(--ink);border-radius:8px;padding:8px 11px;font-weight:650}
+button.primary{background:var(--blue);color:white;border-color:var(--blue)}
+input,select{font:inherit;padding:9px;border:1px solid var(--line);border-radius:7px;background:white;min-width:0;width:100%;color:var(--ink)}
+.controls input,.controls select{width:auto}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.kpi,.panel{background:white;border:1px solid var(--line);border-radius:13px;box-shadow:0 2px 8px #18365b08}
+.kpi{padding:16px}.kpi .label{color:var(--muted);font-size:12px}
+.kpi strong{display:block;font-size:24px;margin:9px 0 5px;overflow-wrap:anywhere}
+.green{color:var(--green)}.red{color:var(--red)}
+.charts{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.panel{padding:15px;margin-bottom:14px;min-width:0}
+.panel h3{margin:0 0 12px;font-size:15px}
+.chart{height:145px;display:flex;align-items:end;gap:9px;padding:10px 5px 0;border-bottom:1px solid var(--line)}
+.bar{flex:1;border-radius:5px 5px 0 0;min-height:2px}
+.in{background:#20a565}.out{background:#e65a69}
+.legend{font-size:11px;color:var(--muted);display:flex;gap:12px;margin:8px 0}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+.content{display:grid;grid-template-columns:1.35fr 1fr;gap:12px}
+.sectionhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.sectionhead h3{margin:0}
+.rowform{display:grid;grid-template-columns:1fr 120px 32px;gap:6px;margin:7px 0}
+.rowform.passive{grid-template-columns:1fr 110px 105px 32px}
+.rowform button{padding:5px;color:var(--red);background:#fff5f5}
+.summary{background:#f5f8fc;border-radius:9px;padding:12px;margin-top:10px}
+.summary div{display:flex;justify-content:space-between;gap:8px;padding:7px 0;font-size:12px}
+.summary .big{font-size:17px;font-weight:800;border-top:1px solid #dce4ef;margin-top:5px;padding-top:12px}
+.total{display:flex;justify-content:space-between;padding:11px 5px;border-top:1px solid var(--line);font-weight:800}
+.smallnote{font-size:11px;color:var(--muted);line-height:1.5}
+.progress{height:9px;background:#e7edf5;border-radius:9px;overflow:hidden;margin:9px 0}
+.progress span{display:block;height:100%;background:var(--green);width:0}
+.donutrow{display:flex;align-items:center;gap:15px}
+.donut{width:125px;height:125px;border-radius:50%;background:conic-gradient(#17a15b 0%,#e5eaf2 0%);display:grid;place-items:center;flex:none}
+.donut:after{content:"";width:85px;height:85px;border-radius:50%;background:white}
+.donutwrap{position:relative;display:grid;place-items:center}
+.donutlabel{position:absolute;font-size:20px;font-weight:800}
+table{width:100%;border-collapse:collapse;font-size:12px}
+td{padding:9px 6px;border-bottom:1px solid var(--line)}
+td:last-child{text-align:right;font-weight:700}
+.totalrow{font-weight:800;background:#f1f7f4}
+@media(max-width:1050px){.charts{grid-template-columns:1fr 1fr}.charts .panel:last-child{grid-column:span 2}.content{grid-template-columns:1fr}}
+@media(max-width:700px){
+.app{display:block}aside{padding:10px;position:static}
+.brand{padding:5px 7px 10px}.nav{flex-direction:row;overflow-x:auto}
+.nav button{white-space:nowrap;padding:9px}.quote{display:none}
+main{padding:14px 10px 30px}.top{align-items:flex-start;flex-direction:column}
+.top h1{font-size:21px}.controls{width:100%}.controls input,.controls select{flex:1;max-width:48%}
+.kpis{grid-template-columns:1fr 1fr;gap:8px}.kpi{padding:12px}.kpi strong{font-size:20px}
+.charts{grid-template-columns:1fr}.charts .panel:last-child{grid-column:auto}
+.rowform{grid-template-columns:1fr 100px 30px}
+.rowform.passive{grid-template-columns:1fr 95px 95px 30px}
+.donut{width:105px;height:105px}.donut:after{width:70px;height:70px}
+}
+@media(max-width:380px){.rowform.passive{grid-template-columns:1fr 85px 85px 28px}}
+@media print{aside,.no-print{display:none!important}.app{display:block}main{padding:0}.panel,.kpi{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside>
+<div class="brand">📈 FinAI<small>WEALTH BUILDERS</small></div>
+<nav class="nav">
+<button onclick="go('top')">⌂ Dashboard</button>
+<button onclick="go('incomePanel')">▤ Income</button>
+<button onclick="go('expensePanel')">▣ Expenses</button>
+<button onclick="go('assetPanel')">▥ Assets</button>
+<button onclick="go('liabilityPanel')">▣ Liabilities</button>
+<button onclick="go('passivePanel')">♧ Passive Income</button>
+<button onclick="go('cashPanel')">＄ Cash Flow</button>
+<button onclick="go('netPanel')">▥ Net Worth</button>
+<button onclick="go('historyPanel')">☷ Reports</button>
+</nav>
+<div class="quote">“It's not how much money you make, but how much money you keep.”<br><br>— Robert Kiyosaki</div>
+</aside>
+<main id="top">
+<div class="top">
+<div><h1>FinAI Wealth Dashboard</h1><div class="sub">Track · Plan · Grow · Achieve Financial Freedom</div></div>
+<div class="controls">
+<input type="month" id="period">
+<select id="family"><option>My Family</option><option>Personal</option></select>
+<button class="primary no-print" onclick="saveMonth()">Save Month</button>
+<button class="no-print" onclick="exportData()">Export</button>
+<button class="no-print" onclick="print()">Print</button>
+</div>
+</div>
+<div class="kpis">
+<div class="kpi"><div class="label">Monthly Income</div><strong id="mIncome">₹0</strong><span class="green">↗ Total income</span></div>
+<div class="kpi"><div class="label">Monthly Expenses</div><strong id="mExpense">₹0</strong><span class="red">Monthly spending</span></div>
+<div class="kpi"><div class="label">Monthly Cash Flow</div><strong id="mCash">₹0</strong><span class="green">Income minus expenses</span></div>
+<div class="kpi"><div class="label">Net Worth</div><strong id="mNet">₹0</strong><span class="green">Assets minus liabilities</span></div>
+</div>
+<div class="charts">
+<section class="panel"><h3>Income vs Expenses</h3>
+<div class="legend"><span><i class="dot" style="background:#20a565"></i>Income</span><span><i class="dot" style="background:#e65a69"></i>Expenses</span></div>
+<div class="chart" id="incomeChart"></div>
+<p class="smallnote">Current month comparison</p></section>
+<section class="panel" id="cashPanel"><h3>Cash Flow Analysis</h3>
+<div class="summary">
+<div><span>Monthly surplus / deficit</span><b id="cashFlow">₹0</b></div>
+<div><span>Savings rate</span><b id="savingsRate">0%</b></div>
+<div><span>Annual surplus</span><b id="annualSurplus">₹0</b></div>
+</div><p class="smallnote" id="cashStatus">Enter your income and expenses.</p></section>
+<section class="panel" id="netPanel"><h3>Net Worth Summary</h3>
+<div class="summary">
+<div><span>Total Assets</span><b id="balanceAssets">₹0</b></div>
+<div><span>Total Liabilities</span><b id="balanceLiabilities">₹0</b></div>
+<div class="big"><span>NET WORTH</span><b id="netWorth">₹0</b></div>
+<div><span>Debt / Asset Ratio</span><b id="debtRatio">0%</b></div>
+</div></section>
+</div>
+<div class="content">
+<div>
+<section class="panel" id="passivePanel">
+<div class="sectionhead"><h3>🌱 Passive Income Tracker</h3><button class="primary no-print" onclick="addPassive()">+ Add Income</button></div>
+<div id="passiveRows"></div>
+<table><tbody>
+<tr class="totalrow"><td>Total Monthly Passive Income</td><td id="passiveMonthly">₹0</td></tr>
+<tr><td>Annual Passive Income</td><td id="passiveAnnual">₹0</td></tr>
+<tr><td>Family Expense Coverage</td><td id="passiveCoverage">0%</td></tr>
+</tbody></table></section>
+<section class="panel" id="incomePanel">
+<div class="sectionhead"><h3>Monthly Income Breakdown</h3><button class="no-print" onclick="add('income')">+ Add Income</button></div>
+<div id="incomeRows"></div><div class="total"><span>Total Income</span><span id="incomeTotal">₹0</span></div>
+</section>
+<section class="panel" id="expensePanel">
+<div class="sectionhead"><h3>Monthly Expense Breakdown</h3><button class="no-print" onclick="add('expenses')">+ Add Expense</button></div>
+<div id="expensesRows"></div><div class="total"><span>Total Expenses</span><span id="expensesTotal">₹0</span></div>
+</section>
+</div>
+<div>
+<section class="panel"><h3>Passive Income vs Expenses</h3>
+<div class="donutrow"><div class="donutwrap"><div class="donut" id="coverageDonut"></div><span class="donutlabel" id="coverageLabel">0%</span></div>
+<div><b id="coverageText">0% covered</b><p class="smallnote">Passive income compared with monthly family expenses.</p><b id="passiveGap">Remaining gap: ₹0</b></div></div>
+<div class="progress"><span id="coverageBar"></span></div></section>
+<section class="panel"><div class="sectionhead"><h3>🎯 Passive Income Goal</h3></div>
+<label class="smallnote">Target monthly passive income (₹)</label>
+<input id="passiveTarget" type="number" min="0" placeholder="Enter your goal" oninput="calculate()">
+<div class="progress"><span id="goalBar"></span></div><b id="passiveProgress">Set your goal</b>
+</section>
+<div class="sectionhead"><h3>Balance Sheet</h3></div>
+<div class="split">
+<section class="panel" id="assetPanel"><div class="sectionhead"><h3>Assets</h3><button class="no-print" onclick="add('assets')">+ Add</button></div>
+<div id="assetsRows"></div><div class="total"><span>Total Assets</span><span id="assetsTotal">₹0</span></div></section>
+<section class="panel" id="liabilityPanel"><div class="sectionhead"><h3>Liabilities</h3><button class="no-print" onclick="add('liabilities')">+ Add</button></div>
+<div id="liabilitiesRows"></div><div class="total"><span>Total Liabilities</span><span id="liabilitiesTotal">₹0</span></div></section>
+</div>
+</div>
+</div>
+<section class="panel" id="historyPanel"><h3>Monthly Records & Reports</h3><div id="history">No saved months yet.</div>
+<p class="smallnote">Your information is stored in this browser on this device. Export backups regularly. Avoid entering sensitive information on shared devices.</p></section>
+</main>
+</div>
+<script>
+const defaults={
+income:[["Salary",0],["Business income",0],["Rental income",0],["Interest and dividends",0],["Other income",0]],
+expenses:[["Household expenses",0],["Loan EMIs",0],["Children education",0],["Groceries",0],["Transport and fuel",0],["Insurance",0],["Lifestyle",0],["Other expenses",0]],
+assets:[["Cash and Bank Balance",0],["Mutual Funds",0],["Stocks and ETFs",0],["Gold and Jewellery",0],["Property (Market Value)",0],["Business Assets",0],["Other Assets",0]],
+liabilities:[["Home Loan",0],["Car Loan",0],["Personal Loan",0],["Credit Card",0],["Business Loan",0],["Other Liabilities",0]],
+passive:[["House Rent",0,"Monthly"],["Dividends",0,"Quarterly"],["FD Interest",0,"Monthly"]]
+};
+let data=JSON.parse(localStorage.getItem("finaiData")||"null")||defaults;
+const money=n=>"₹"+Math.round(Number(n)||0).toLocaleString("en-IN");
+const total=k=>data[k].reduce((s,x)=>s+(Number(x[1])||0),0);
+function persist(){localStorage.setItem("finaiData",JSON.stringify(data))}
+function go(id){document.getElementById(id).scrollIntoView({behavior:"smooth"})}
+function add(k){data[k].push(["New item",0]);persist();render()}
+function addPassive(){data.passive.push(["New income",0,"Monthly"]);persist();render()}
+function renderRows(k){
+let host=document.getElementById(k+"Rows");host.innerHTML="";
+data[k].forEach((x,i)=>{
+let r=document.createElement("div");r.className="rowform";
+let n=document.createElement("input");n.value=x[0];n.placeholder="Category";
+n.onchange=()=>{x[0]=n.value;persist()};
+let a=document.createElement("input");a.type="number";a.min="0";a.inputMode="decimal";a.value=x[1]||"";a.placeholder="₹ Amount";
+a.oninput=()=>{x[1]=Number(a.value)||0;persist();calculate()};
+let d=document.createElement("button");d.textContent="×";d.onclick=()=>{data[k].splice(i,1);persist();render()};
+r.append(n,a,d);host.append(r);
+});
+}
+function renderPassive(){
+let host=document.getElementById("passiveRows");host.innerHTML="";
+data.passive.forEach((x,i)=>{
+let r=document.createElement("div");r.className="rowform passive";
+let n=document.createElement("input");n.value=x[0];n.placeholder="Income source";n.onchange=()=>{x[0]=n.value;persist()};
+let a=document.createElement("input");a.type="number";a.min="0";a.value=x[1]||"";a.placeholder="Amount ₹";
+a.oninput=()=>{x[1]=Number(a.value)||0;persist();calculate()};
+let f=document.createElement("select");
+["Monthly","Weekly","Quarterly","Annually"].forEach(v=>{let o=document.createElement("option");o.value=v;o.textContent=v;o.selected=x[2]===v;f.append(o)});
+f.onchange=()=>{x[2]=f.value;persist();calculate()};
+let d=document.createElement("button");d.textContent="×";d.onclick=()=>{data.passive.splice(i,1);persist();render()};
+r.append(n,a,f,d);host.append(r);
+});
+}
+function calculate(){
+let inc=total("income"),exp=total("expenses"),a=total("assets"),l=total("liabilities"),cf=inc-exp,nw=a-l;
+let set=(id,v)=>{let e=document.getElementById(id);if(e)e.textContent=v};
+let vals={mIncome:money(inc),mExpense:money(exp),mCash:money(cf),mNet:money(nw),incomeTotal:money(inc),expensesTotal:money(exp),assetsTotal:money(a),liabilitiesTotal:money(l),cashFlow:money(cf),savingsRate:(inc?cf/inc*100:0).toFixed(1)+"%",annualSurplus:money(cf*12),balanceAssets:money(a),balanceLiabilities:money(l),netWorth:money(nw),debtRatio:(a?l/a*100:0).toFixed(1)+"%"};
+Object.entries(vals).forEach(([k,v])=>set(k,v));
+set("cashStatus",cf<0?"Expenses exceed income. Review spending and debt.":inc?"Positive monthly cash flow. Plan your surplus towards savings and investments.":"Enter your income and expenses.");
+let pm=0;
+data.passive.forEach(x=>{let v=Number(x[1])||0;pm+=x[2]==="Weekly"?v*52/12:x[2]==="Quarterly"?v/3:x[2]==="Annually"?v/12:v});
+set("passiveMonthly",money(pm));set("passiveAnnual",money(pm*12));
+let cov=exp?Math.min(pm/exp*100,100):0;
+set("passiveCoverage",(exp?pm/exp*100:0).toFixed(1)+"%");
+set("coverageLabel",Math.round(cov)+"%");
+set("coverageText",Math.round(cov)+"% of expenses covered");
+set("passiveGap","Remaining gap: "+money(Math.max(0,exp-pm)));
+document.getElementById("coverageBar").style.width=cov+"%";
+document.getElementById("coverageDonut").style.background="conic-gradient(#17a15b 0 "+cov+"%,#e5eaf2 "+cov+"% 100%)";
+let target=Number(document.getElementById("passiveTarget").value)||Number(data.passiveTarget)||0;
+data.passiveTarget=target;
+let pct=target?Math.min(pm/target*100,100):0;
+document.getElementById("goalBar").style.width=pct+"%";
+set("passiveProgress",target?pct.toFixed(0)+"% of your monthly passive income goal reached.":"Set your passive income goal.");
+let max=Math.max(inc,exp,1);
+document.getElementById("incomeChart").innerHTML=
+'<div class="bar in" style="height:'+Math.max(2,inc/max*100)+'%" title="Income"></div>'+
+'<div class="bar out" style="height:'+Math.max(2,exp/max*100)+'%" title="Expenses"></div>';
+persist();
+}
+function render(){["income","expenses","assets","liabilities"].forEach(renderRows);renderPassive();calculate()}
+function saveMonth(){
+let m=document.getElementById("period").value;if(!m){alert("Select a month first.");return}
+let h=JSON.parse(localStorage.getItem("finaiHistory")||"{}");
+h[m]=JSON.parse(JSON.stringify(data));localStorage.setItem("finaiHistory",JSON.stringify(h));showHistory();alert("Monthly record saved on this device.");
+}
+function showHistory(){
+let h=JSON.parse(localStorage.getItem("finaiHistory")||"{}");
+document.getElementById("history").innerHTML=Object.keys(h).sort().reverse().map(m=>'<p>'+m+' <button onclick="loadMonth(\\''+m+'\\')">Load</button></p>').join("")||"No saved months yet.";
+}
+function loadMonth(m){
+let h=JSON.parse(localStorage.getItem("finaiHistory")||"{}");data=h[m];persist();
+document.getElementById("passiveTarget").value=data.passiveTarget||"";render();
+}
+function exportData(){
+let blob=new Blob([JSON.stringify({data,history:JSON.parse(localStorage.getItem("finaiHistory")||"{}")},null,2)],{type:"application/json"});
+let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="finai-wealth-backup.json";a.click();URL.revokeObjectURL(a.href);
+}
+document.getElementById("period").value=new Date().toISOString().slice(0,7);
+document.getElementById("passiveTarget").value=data.passiveTarget||"";
+render();showHistory();
+</script>
+</body>
+  </html>
+
